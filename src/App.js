@@ -13,7 +13,6 @@ export default class App extends PureComponent {
     render () {
         return (
             <div>
-                the app:
                 <Board width={10} height={10} colors={['red', 'green', 'blue']} />
             </div>
         );

@@ -2,6 +2,7 @@
 import React, {PureComponent, PropTypes} from 'react';
 
 import Logic from './Logic';
+import Solver from './Solver';
 
 import './Board.css';
 
@@ -15,6 +16,7 @@ export default class Board extends PureComponent {
 
     state = {
         board: null,
+        solution: null,
     };
 
     logic: null;
@@ -24,9 +26,37 @@ export default class Board extends PureComponent {
 
         const {width, height, colors} = this.props;
         window.logic = this.logic = new Logic({width, height, colors});
+        window.solver = this.solver = new Solver(this.logic);
         this.logic.print();
 
         this.state.board = this.logic.export();
+    }
+
+    solve () {
+        const solution = this.solver.solve();
+        if (!solution) return this.setState({message: 'No solution found'});
+        this.setState({solution});
+    }
+
+    play () {
+        const {playing, solution} = this.state;
+        if (playing) return;
+        if (!solution) return;
+        const clone = this.logic.clone();
+        const queue = Array.from(solution);
+        this._playInterval = setInterval(() => {
+            if (!queue.length) {
+                clearInterval(this._playInterval);
+                this.setState({playing: false});
+                return;
+            };
+            const [x, y] = queue.shift();
+            clone.selectTile(x, y);
+            this.setState({
+                board: clone.export(),
+                message: `Move ${solution.length - queue.length + 1}`,
+            });
+        }, 500);
     }
 
     handleCellClick = ({target: {dataset}}) => {
@@ -34,11 +64,15 @@ export default class Board extends PureComponent {
         const y = parseInt(dataset.y);
         this.logic.selectTile(x, y);
         this.setState({board: this.logic.export()});
-    }
+    };
+
+    handleSolve = () => this.solve();
+
+    handlePlay = () => this.play();
 
     render () {
         const {width, height, colors, ...rest} = this.props;
-        const {board: {data}} = this.state;
+        const {solution, message, playing, board: {data}} = this.state;
 
         /**
          * Instead of doing fancy Array Flip logic inside here
@@ -49,20 +83,34 @@ export default class Board extends PureComponent {
 
         return (
         <div {...rest} className='board'>
-            {data.map((column, x) =>
-                <div key={x} className='board-column'>
-                    {column.map((color, y) =>
-                        <div
-                            key={y}
-                            className='board-cell'
-                            style={{backgroundColor: color}}
-                            data-x={x}
-                            data-y={y}
-                            onClick={this.handleCellClick}
-                        />
-                    )}
-                </div>
-            )}
+            <div className='board-grid'>
+                {data.map((column, x) =>
+                    <div key={x} className='board-column'>
+                        {column.map((color, y) =>
+                            <div
+                                key={y}
+                                className='board-cell'
+                                style={{backgroundColor: color}}
+                                data-x={x}
+                                data-y={y}
+                                onClick={this.handleCellClick}
+                            />
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {!message ? null : <div className='board-message'>{message}</div>}
+
+            {!solution ? null : <div className='board-message'>Solution has {solution.length} moves</div>}
+
+            <div>
+                <button disabled={playing} onClick={this.handleSolve}>Solve!</button>
+
+                {!solution ? null :
+                    <button disabled={playing} onClick={this.handlePlay}>Play Solution!</button>
+                }
+            </div>
         </div>
         );
     }

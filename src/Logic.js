@@ -1,6 +1,8 @@
 
 import {shuffle} from './utils/array';
 
+const getHash = (x, y) => `${x}-${y}`;
+
 export default class Logic {
 
     options = {
@@ -88,8 +90,7 @@ export default class Logic {
      * Perform a seed-fill at the given coordinate and return each element.
      * 4-directional only
      */
-    getCluster (x, y) {
-        const {data} = this;
+    getCluster (x, y, data=this.data) {
         const {width, height} = this.options;
 
         if (this.isOutOfBounds(x, y)) return null;
@@ -102,7 +103,7 @@ export default class Logic {
 
         const checkAndAdd = (x, y) => {
             if (this.isOutOfBounds(x, y)) return;
-            const hash = `${x}-${y}`;
+            const hash = getHash(x, y);
             if (checked[hash]) return;
             checked[hash] = true;
             if (data[x][y] !== id) return;
@@ -117,6 +118,7 @@ export default class Logic {
             const [x, y] = coord;
 
             cluster.push(coord);
+            checked[getHash(x, y)] = true;
             checkAndAdd(x, y - 1);
             checkAndAdd(x + 1, y);
             checkAndAdd(x, y + 1);
