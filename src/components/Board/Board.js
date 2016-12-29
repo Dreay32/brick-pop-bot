@@ -1,8 +1,8 @@
 
 import React, {PureComponent, PropTypes} from 'react';
 
-import Logic from './Logic';
-import Solver from './Solver';
+import Logic from '../../lib/Logic';
+import Solver from '../../lib/Solver';
 
 import './Board.css';
 
@@ -44,6 +44,7 @@ export default class Board extends PureComponent {
         if (!solution) return;
         const clone = this.logic.clone();
         const queue = Array.from(solution);
+        this.setState({playing: true});
         this._playInterval = setInterval(() => {
             if (!queue.length) {
                 clearInterval(this._playInterval);
@@ -54,7 +55,7 @@ export default class Board extends PureComponent {
             clone.selectTile(x, y);
             this.setState({
                 board: clone.export(),
-                message: `Move ${solution.length - queue.length + 1}`,
+                message: `Move ${solution.length - queue.length}`,
             });
         }, 500);
     }

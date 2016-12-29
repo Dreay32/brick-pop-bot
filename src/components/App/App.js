@@ -1,8 +1,7 @@
 
 import React, {PureComponent, PropTypes} from 'react';
 
-import './App.css';
-import Board from './Board';
+import Board from '../Board/Board';
 
 export default class App extends PureComponent {
 

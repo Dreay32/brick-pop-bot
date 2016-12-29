@@ -1,5 +1,5 @@
 
-import {shuffle} from './utils/array';
+import {shuffle} from '../utils/array';
 
 const getHash = (x, y) => `${x}-${y}`;
 
