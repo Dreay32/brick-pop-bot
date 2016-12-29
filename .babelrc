@@ -1,0 +1,18 @@
+{
+  "plugins": [
+    "transform-decorators-legacy",
+    "transform-react-display-name",
+  ],
+  "presets": [
+    ["es2015", { "modules": false }],
+    "react",
+    "stage-0"
+  ],
+  "env": {
+    "development": {
+      "presets": [
+        "react-hmre"
+      ]
+    }
+  }
+}

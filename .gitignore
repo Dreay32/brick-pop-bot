@@ -1,0 +1,9 @@
+node_modules/
+npm-debug.log
+*.sublime-workspace
+.env
+.DS_Store
+variables.json
+*.log
+.env
+build
