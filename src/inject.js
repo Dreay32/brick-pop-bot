@@ -1,6 +1,6 @@
 
 (() => {
-    const SCALE = 1 / 4;
+    const SCALE = 1 / 2;
     const ROWS = 10;
     const COLS = 10;
 
@@ -31,14 +31,23 @@
         const colors = {};
         const cellW = width / COLS | 0;
         const cellH = height / ROWS | 0;
-        for (let y = 0; y < COLS; ++y) {
-            for (let x = 0; x < ROWS; ++x) {
+        for (let y = 0; y < ROWS; ++y) {
+            for (let x = 0; x < COLS; ++x) {
                 const index = (
-                    (y * cellH + Math.round(cellH / 2)) * COLS * cellW +
-                    x * cellW + Math.round(cellW / 2)
+                    (((y + 0.5) * cellH) * COLS * cellW | 0) +
+                    ((x + 0.5) * cellW | 0)
                 ) * 4;
                 matrix[y][x] = rgb2hsv(data[index], data[index + 1], data[index + 2]);
                 colors[matrix[y][x].h] = true;
+
+                const {h, s, v} = matrix[y][x];
+                console.log(
+                    '%c  %c x:%d, y:%d, index:%d, [%d %d% %d%]',
+                    `background: hsl(${h}, ${s}%, ${v}%); border: 1px solid black; border-radius: 50%;`,
+                    'background: white; border: 0;',
+                    x, y, index, h, s, v
+                );
+
                 // ctx.fillStyle = 'black';
                 // ctx.fillRect(y * cellH + cellH / 2 - 2, x * cellW + cellW / 2 - 2, 4, 4);
             }
@@ -48,7 +57,7 @@
             [('%c  '.repeat(COLS) + '\n').repeat(ROWS)].concat(
                 matrix.reduce((arr, row) => arr.concat(row.map(
                     ({h, s, v}) => `background: hsl(${h}, ${s}%, ${v}%);`
-                )))
+                )), [])
             )
         );
 
