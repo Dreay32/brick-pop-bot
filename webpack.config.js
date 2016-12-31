@@ -9,6 +9,7 @@ const sourcePath = path.join(__dirname, './src');
 const staticsPath = path.join(__dirname, './build');
 
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
 
 const plugins = [
     new webpack.optimize.CommonsChunkPlugin({
@@ -21,6 +22,7 @@ const plugins = [
     }),
     new webpack.NamedModulesPlugin(),
     new ExtractTextPlugin('styles.bundle.css'),
+    new ManifestPlugin(),
 ];
 
 if (!isProd) {
@@ -37,7 +39,8 @@ module.exports = {
 
     entry: {
         js: './index.js',
-        vendor: ['react'],
+        inject: './inject.js',
+        vendor: ['react', 'react-dom'],
     },
 
     output: {
