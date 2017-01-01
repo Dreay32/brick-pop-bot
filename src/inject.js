@@ -30,7 +30,7 @@ const init = () => {
 
     const {matrix, colors} = generatePreview(imgData);
 
-    const logic = new Logic({
+    const logic = window.logic = new Logic({
         width: COLS,
         height: ROWS,
         colors: colors.map(hsv2string),

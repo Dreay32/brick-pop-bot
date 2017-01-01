@@ -3,6 +3,7 @@
     background: white;
 }
 
-#bot-container .board {
-    zoom: 0.5;
+#bot-container .board-cell {
+    width: 15px;
+    height: 15px;
 }
