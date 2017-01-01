@@ -5,6 +5,7 @@
 .board-grid {
     display: flex;
     flex-direction: column;
+    background: white;
 }
 
 .board-row {
@@ -15,7 +16,7 @@
     display: inline-flex;
     width: 30px;
     height: 30px;
-    background: #000;
+    background: #eee;
     margin: 1px;
     cursor: pointer;
 }

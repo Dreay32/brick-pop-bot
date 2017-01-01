@@ -37,13 +37,86 @@ const init = () => {
         data: matrix.map(arr => arr.map(hsv2string)),
     });
 
+    window.clickOnTile = clickOnTile;
+
     ReactDOM.render(
-        <Board logic={logic} />,
+        <Board logic={logic} onSolve={handleSolve} />,
         document.getElementById('bot-react')
     );
 };
 
 const hsv2string = ({h, s, v}) => `hsl(${h}, ${s}%, ${v}%)`;
+
+const $ = el => Object.assign(el, {
+    attr: obj => {
+        Object.keys(obj).forEach(key => { el.setAttribute(key, obj[key]); });
+        return el;
+    },
+    css: obj => {
+        Object.keys(obj).forEach(key => { el.style[key] = obj[key]; });
+        return el;
+    },
+});
+
+const handleSolve = solution => {
+    const stack = Array.from(solution)
+    const iterate = () => {
+        if (!stack.length) return;
+        const [x, y] = stack.shift();
+        clickOnTile(x, y);
+        setTimeout(iterate, 2000);
+    }
+    iterate();
+}
+
+const pointer = $(document.createElement('div')).css({
+    position: 'fixed',
+    zIndex: 100000,
+    top: 0,
+    left: 0,
+    width: '20px',
+    height: '20px',
+    border: '2px solid white',
+    boxShadow: '2px 2px 2px #000',
+    borderRadius: '50%',
+    background: 'orange',
+    pointerEvents: 'none',
+});
+pointer.dataset.botInject = true;
+document.body.appendChild(pointer);
+const clickOnTile = (x, y) => {
+    const {offsetLeft, offsetTop, offsetWidth, offsetHeight} = document.getElementById('canvas');
+
+    const delta = (offsetHeight - offsetWidth) / 2;
+    const tileW = offsetWidth / COLS;
+    const tileH = (offsetHeight - delta * 2) / ROWS;
+
+    const targetX = offsetLeft + (x + 0.5) * tileW | 0;
+    const targetY = offsetTop + delta + (y + 0.5) * tileH | 0;
+
+    console.log({delta, offsetLeft, offsetTop, offsetWidth, offsetHeight, tileH, tileW})
+    console.info(`[click(${x}, ${y})]`, targetX, targetY);
+    pointer.style.top = targetY - pointer.offsetWidth / 2 + 'px';
+    pointer.style.left = targetX - pointer.offsetWidth / 2 + 'px';
+
+    dispatchMouseEvent('mousedown', targetX, targetY);
+    dispatchMouseEvent('mouseup', targetX, targetY);
+}
+
+// http://stackoverflow.com/a/16509592/574576
+const dispatchMouseEvent = (type, x, y) => {
+    var ev = document.createEvent('MouseEvent');
+    var el = document.elementFromPoint(x,y);
+    ev.initMouseEvent(
+        type,
+        true /* bubble */, true /* cancelable */,
+        window, null,
+        x, y, x, y, /* coordinates */
+        false, false, false, false, /* modifier keys */
+        0 /*left*/, null
+    );
+    el.dispatchEvent(ev);
+}
 
 const generatePreview = imgData => {
     const {width, height, data} = imgData;
@@ -102,13 +175,6 @@ const getImageData = () => {
     return tmpCtx.getImageData(0, delta, tmpCanvas.width, tmpCanvas.height - delta * 2);
 };
 
-const $ = el => Object.assign(el, {
-    attr: obj => {
-        Object.keys(obj).forEach(key => { el.setAttribute(key, obj[key]); });
-        return el;
-    },
-});
-
 const rgb2hsv = (a, b, c) => {
     var rr, gg, bb,
         r = a / 255,
@@ -148,20 +214,5 @@ const rgb2hsv = (a, b, c) => {
         v: Math.round(v * 100)
     };
 };
-
-// http://stackoverflow.com/a/16509592/574576
-const dispatchMouseEvent = (type, x, y) => {
-    var ev = document.createEvent('MouseEvent');
-    var el = document.elementFromPoint(x,y);
-    ev.initMouseEvent(
-        type,
-        true /* bubble */, true /* cancelable */,
-        window, null,
-        x, y, x, y, /* coordinates */
-        false, false, false, false, /* modifier keys */
-        0 /*left*/, null
-    );
-    el.dispatchEvent(ev);
-}
 
 init();

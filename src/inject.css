@@ -1,4 +1,8 @@
 
+#bot-container {
+    background: white;
+}
+
 #bot-container .board {
     zoom: 0.5;
 }

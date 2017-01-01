@@ -11,6 +11,7 @@ export default class Board extends PureComponent {
 
     static propTypes = {
         logic: PropTypes.instanceOf(Logic).isRequired,
+        onSolve: PropTypes.func,
     };
 
     state = {
@@ -29,8 +30,10 @@ export default class Board extends PureComponent {
     }
 
     solve () {
+        const {onSolve} = this.props;
         const solution = this.solver.solve();
         if (!solution) return this.setState({message: 'No solution found'});
+        if (onSolve) onSolve(solution);
         this.setState({solution});
     }
 
@@ -70,7 +73,7 @@ export default class Board extends PureComponent {
     handlePlay = () => this.play();
 
     render () {
-        const {logic, ...rest} = this.props;
+        const {logic, onSolve, ...rest} = this.props;
         const {solution, message, playing, board: {data}} = this.state;
 
         const matrix = transpose(data);
