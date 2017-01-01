@@ -14,13 +14,22 @@ After opening a Brick Pop game in a messenger window, open the console and paste
 ```js
 (() => {
     console.clear();
-    const old = document.getElementById('hack-inject');
-    if (old) old.remove();
+    Array.from(document.querySelectorAll('[data-bot-inject]')).forEach(elem => elem.remove());
+
     const script = document.createElement('script');
-    script.src = 'https://mylocal.facebook.com/inject?rand=' + Math.random();
-    script.setAttribute('id', 'hack-inject');
-    script.dataset.hack = true;
+    script.src = 'https://mylocal.facebook.com/inject.bundle.js?rand=' + Math.random();
+    script.dataset.botInject = true;
     document.body.appendChild(script);
+
+    fetch('https://mylocal.facebook.com/styles.bundle.css?rand=' + Math.random())
+    .then(res => res.text())
+    .then(text => {
+        const style = document.createElement('style');
+        document.body.appendChild(style);
+        style.dataset.botInject = true;
+        style.innerHTML = text;
+    })
+    .catch(ex => console.warn('[BOT] Could not load styles', ex.stack || ex));
 })();
 ```
 

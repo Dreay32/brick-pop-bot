@@ -3,15 +3,14 @@ import React, {PureComponent, PropTypes} from 'react';
 
 import Logic from '../../lib/Logic';
 import Solver from '../../lib/Solver';
+import {transpose} from '../../utils/array';
 
 import './Board.css';
 
 export default class Board extends PureComponent {
 
     static propTypes = {
-        width: PropTypes.number.isRequired,
-        height: PropTypes.number.isRequired,
-        colors: PropTypes.arrayOf(PropTypes.oneOf(['red', 'green', 'blue'])).isRequired,
+        logic: PropTypes.instanceOf(Logic).isRequired,
     };
 
     state = {
@@ -19,17 +18,14 @@ export default class Board extends PureComponent {
         solution: null,
     };
 
-    logic: null;
-
     constructor (props) {
         super(props);
 
-        const {width, height, colors} = this.props;
-        window.logic = this.logic = new Logic({width, height, colors});
-        window.solver = this.solver = new Solver(this.logic);
-        this.logic.print();
+        const {logic} = this.props;
+        window.solver = this.solver = new Solver(this.props.logic);
+        logic.print();
 
-        this.state.board = this.logic.export();
+        this.state.board = logic.export();
     }
 
     solve () {
@@ -39,10 +35,11 @@ export default class Board extends PureComponent {
     }
 
     play () {
+        const {logic} = this.props;
         const {playing, solution} = this.state;
         if (playing) return;
         if (!solution) return;
-        const clone = this.logic.clone();
+        const clone = logic.clone();
         const queue = Array.from(solution);
         this.setState({playing: true});
         this._playInterval = setInterval(() => {
@@ -61,10 +58,11 @@ export default class Board extends PureComponent {
     }
 
     handleCellClick = ({target: {dataset}}) => {
+        const {logic} = this.props;
         const x = parseInt(dataset.x);
         const y = parseInt(dataset.y);
-        this.logic.selectTile(x, y);
-        this.setState({board: this.logic.export()});
+        logic.selectTile(x, y);
+        this.setState({board: logic.export()});
     };
 
     handleSolve = () => this.solve();
@@ -72,24 +70,19 @@ export default class Board extends PureComponent {
     handlePlay = () => this.play();
 
     render () {
-        const {width, height, colors, ...rest} = this.props;
+        const {logic, ...rest} = this.props;
         const {solution, message, playing, board: {data}} = this.state;
 
-        /**
-         * Instead of doing fancy Array Flip logic inside here
-         *  I'm transposing the matrix via css - flexbox FTW
-         *  ...
-         *  shut up, it's awesome!
-         */
+        const matrix = transpose(data);
 
         return (
         <div {...rest} className='board'>
             <div className='board-grid'>
-                {data.map((column, x) =>
-                    <div key={x} className='board-column'>
-                        {column.map((color, y) =>
+                {matrix.map((row, y) =>
+                    <div key={y} className='board-row'>
+                        {row.map((color, x) =>
                             <div
-                                key={y}
+                                key={x}
                                 className='board-cell'
                                 style={{backgroundColor: color}}
                                 data-x={x}

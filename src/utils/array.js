@@ -6,3 +6,5 @@ export const shuffle = a => {
     }
     return a;
 }
+
+export const transpose = matrix => matrix[0].map((col, i) => matrix.map(row => row[i]))

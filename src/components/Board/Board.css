@@ -4,18 +4,18 @@
 
 .board-grid {
     display: flex;
+    flex-direction: column;
 }
 
-.board-column {
+.board-row {
     display: flex;
-    flex-direction: column;
 }
 
 .board-cell {
     display: inline-flex;
     width: 30px;
     height: 30px;
-    background: #ddd;
+    background: #000;
     margin: 1px;
     cursor: pointer;
 }

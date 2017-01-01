@@ -12,11 +12,11 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 
 const plugins = [
-    new webpack.optimize.CommonsChunkPlugin({
-        name: 'vendor',
-        minChunks: Infinity,
-        filename: 'vendor.bundle.js'
-    }),
+    // new webpack.optimize.CommonsChunkPlugin({
+    //     name: 'vendor',
+    //     minChunks: Infinity,
+    //     filename: 'vendor.bundle.js'
+    // }),
     new webpack.DefinePlugin({
         'process.env': { NODE_ENV: JSON.stringify(nodeEnv) }
     }),
@@ -40,7 +40,7 @@ module.exports = {
     entry: {
         js: './index.js',
         inject: './inject.js',
-        vendor: ['react', 'react-dom'],
+        // vendor: ['react', 'react-dom'],
     },
 
     output: {
@@ -60,7 +60,11 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                // exclude: /node_modules/,
+                exclude: /node_modules/,
+                // use: [
+                //     'style-loader',
+                //     'css-loader',
+                // ],
                 loader: ExtractTextPlugin.extract({
                     fallbackLoader: 'style-loader',
                     loader: 'css-loader',
