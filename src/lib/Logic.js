@@ -1,7 +1,6 @@
 
 import {shuffle} from '../utils/array';
-
-const getHash = (x, y) => `${x}-${y}`;
+import {makeArrayHash} from './utils';
 
 export default class Logic {
 
@@ -99,13 +98,13 @@ export default class Logic {
         const id = data[x][y];
         const cluster = [];
         const stack = [[x, y]];
-        const checked = {};
+
+        const hash = makeArrayHash(width, height);
 
         const checkAndAdd = (x, y) => {
             if (this.isOutOfBounds(x, y)) return;
-            const hash = getHash(x, y);
-            if (checked[hash]) return;
-            checked[hash] = true;
+            if (hash.get(x, y)) return;
+            hash.set(x, y);
             if (data[x][y] !== id) return;
             stack.push([x, y]);
         }
@@ -118,7 +117,7 @@ export default class Logic {
             const [x, y] = coord;
 
             cluster.push(coord);
-            checked[getHash(x, y)] = true;
+            hash.set(x, y);
             checkAndAdd(x, y - 1);
             checkAndAdd(x + 1, y);
             checkAndAdd(x, y + 1);

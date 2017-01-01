@@ -1,7 +1,7 @@
 
 import Logic from './Logic';
 
-const getHash = (x, y) => `${x}-${y}`;
+import {makeArrayHash} from './utils';
 
 const Heuristics = {
     fewClusters: ({clusters}) => clusters.length,
@@ -35,7 +35,8 @@ export default class Solver {
         if (this.isSuccess(boardState)) return path;
         if (this.isFail(boardState)) return null;
 
-        for (let {list: [[x, y]]} of boardState.clusters) {
+        for (let index = 0; index < boardState.clusters.length; ++index) {
+            const {list: [[x, y]]} = boardState.clusters[index];
             const clone = logic.clone();
             clone.selectTile(x, y);
             const result = this.solve(clone, path.concat([[x, y]]));
@@ -60,7 +61,8 @@ export default class Solver {
         }
         toCheck.reverse();
 
-        const checked = {};
+        const hash = makeArrayHash(width, height);
+
         const clusters = [];
         const singles = [];
         while (toCheck.length) {
@@ -68,9 +70,8 @@ export default class Solver {
 
             if (data[x][y] == null) continue;
 
-            const hash = getHash(x, y);
-            if (checked[hash]) continue;
-            checked[hash] = true;
+            if (hash.get(x, y)) continue;
+            hash.set(x, y);
 
             const cluster = this.logic.getCluster(x, y, data);
             if (cluster == null) continue;
@@ -78,7 +79,7 @@ export default class Solver {
 
             for (let [x, y] of cluster.list) {
                 data[x][y] = null;
-                checked[getHash(x, y)] = true;
+                hash.set(x, y);
             }
             bucket.push(cluster);
 

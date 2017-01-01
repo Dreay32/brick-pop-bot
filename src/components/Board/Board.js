@@ -17,13 +17,14 @@ export default class Board extends PureComponent {
     state = {
         board: null,
         solution: null,
+        duration: null,
     };
 
     constructor (props) {
         super(props);
 
         const {logic} = this.props;
-        window.solver = this.solver = new Solver(this.props.logic);
+        this.solver = new Solver(this.props.logic);
         logic.print();
 
         this.state.board = logic.export();
@@ -31,10 +32,12 @@ export default class Board extends PureComponent {
 
     solve () {
         const {onSolve} = this.props;
+        const startTime = Date.now();
         const solution = this.solver.solve();
+        const duration = Math.round((Date.now() - startTime) / 1000 * 100) / 100;
         if (!solution) return this.setState({message: 'No solution found'});
         if (onSolve) onSolve(solution);
-        this.setState({solution});
+        this.setState({solution, duration});
     }
 
     play () {
@@ -74,7 +77,7 @@ export default class Board extends PureComponent {
 
     render () {
         const {logic, onSolve, ...rest} = this.props;
-        const {solution, message, playing, board: {data}} = this.state;
+        const {solution, duration, message, playing, board: {data}} = this.state;
 
         const matrix = transpose(data);
 
@@ -99,7 +102,12 @@ export default class Board extends PureComponent {
 
             {!message ? null : <div className='board-message'>{message}</div>}
 
-            {!solution ? null : <div className='board-message'>Solution has {solution.length} moves</div>}
+            {!solution ? null :
+                <div className='board-message'>
+                    Solution has {solution.length} moves. <br />
+                    Solved in {duration}s
+                </div>
+            }
 
             <div>
                 <button disabled={playing} onClick={this.handleSolve}>Solve!</button>
