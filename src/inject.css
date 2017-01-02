@@ -11,3 +11,7 @@
 #bot-preview {
     display: none;
 }
+
+#bot-react {
+    max-width: 170px;
+}
