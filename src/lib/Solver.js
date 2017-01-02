@@ -52,8 +52,7 @@ export default class Solver {
 
         const next = [];
         for (let index = 0; index < order.length; ++index) {
-            const x = order[index].list[0][0];
-            const y = order[index].list[0][1];
+            const {list: [[x, y]]} = order[index];
             const clone = logic.clone();
             clone.selectTile(x, y);
             const result = this._solveIterator(

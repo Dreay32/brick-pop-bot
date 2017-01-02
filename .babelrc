@@ -1,12 +1,12 @@
 {
   "plugins": [
     "transform-decorators-legacy",
+    "transform-class-properties",
     "transform-react-display-name",
+    "transform-object-rest-spread"
   ],
   "presets": [
-    ["es2015", { "modules": false }],
-    "react",
-    "stage-0"
+    "react"
   ],
   "env": {
     "development": {
