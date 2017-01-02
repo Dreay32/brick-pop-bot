@@ -47,20 +47,21 @@ export default class Solver {
         );
 
         const h = Heuristics.fewSingles;
-
         const currentH = h(boardState);
+        const siblings = [];
 
-        const next = [];
         for (let index = 0; index < order.length; ++index) {
-            const {list: [[x, y]]} = order[index];
+            const {list: [coord]} = order[index];
             const clone = logic.clone();
-            clone.selectTile(x, y);
-            const result = this._solveIterator(
-                clone,
-                this.getBoardState(clone),
-                path.concat([[x, y]]),
-                _config
-            );
+            clone.selectTile(coord[0], coord[1]);
+            const state = this.getBoardState(clone);
+            siblings.push({coord, clone, state});
+        }
+
+        siblings.sort((a, b) => h(a.state) - h(b.state));
+
+        for (let {coord, clone, state} of siblings) {
+            const result = this._solveIterator(clone, state, path.concat([coord]), _config);
             if (result) return result;
         }
 

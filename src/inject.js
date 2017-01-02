@@ -22,7 +22,6 @@ const init = () => {
     if (old) old.remove();
     const container = $(document.createElement('div')).attr({
         id: 'bot-container',
-        style: 'position:fixed; top:10px; left:10px; border:1px solid red;',
     });
     document.body.appendChild(container);
     container.innerHTML = `
