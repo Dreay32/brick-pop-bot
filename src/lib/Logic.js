@@ -39,6 +39,19 @@ export default class Logic {
         return x < 0 || y < 0 || x >= width || y >= height;
     }
 
+    count () {
+        const {data} = this;
+        const result = {};
+        for (let x = 0; x < data.length; ++x) {
+            for (let y = 0; y < data[x].length; ++y) {
+                const val = data[x][y];
+                if (val == null) continue;
+                result[val] = (result[val] || 0) + 1;
+            }
+        }
+        return result;
+    }
+
     selectTile (x, y) {
         const {data} = this;
         const {width, height} = this.options;

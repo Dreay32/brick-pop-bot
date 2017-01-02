@@ -30,11 +30,13 @@ const init = () => {
 
     const {matrix, colors} = generatePreview(imgData);
 
+    const matrixData = matrix.map(arr => arr.map(hsv2string));
+    localStorage.lastMatrix = JSON.stringify(matrixData);
     const logic = window.logic = new Logic({
         width: COLS,
         height: ROWS,
         colors: colors.map(hsv2string),
-        data: matrix.map(arr => arr.map(hsv2string)),
+        data: matrixData,
     });
 
     window.clickOnTile = clickOnTile;
@@ -59,7 +61,7 @@ const $ = el => Object.assign(el, {
 });
 
 const handleSolve = solution => {
-    const stack = Array.from(solution)
+    const stack = Array.from(solution);
     const iterate = () => {
         if (!stack.length) return;
         const [x, y] = stack.shift();
@@ -94,8 +96,8 @@ const clickOnTile = (x, y) => {
     const targetX = offsetLeft + (x + 0.5) * tileW | 0;
     const targetY = offsetTop + delta + (y + 0.5) * tileH | 0;
 
-    console.log({delta, offsetLeft, offsetTop, offsetWidth, offsetHeight, tileH, tileW})
-    console.info(`[click(${x}, ${y})]`, targetX, targetY);
+    // console.log({delta, offsetLeft, offsetTop, offsetWidth, offsetHeight, tileH, tileW})
+    // console.info(`[click(${x}, ${y})]`, targetX, targetY);
     pointer.style.top = targetY - pointer.offsetWidth / 2 + 'px';
     pointer.style.left = targetX - pointer.offsetWidth / 2 + 'px';
 

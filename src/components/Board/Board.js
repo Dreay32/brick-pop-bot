@@ -81,16 +81,15 @@ export default class Board extends PureComponent {
 
         const matrix = transpose(data);
 
-        const swatchCount = {};
+        const swatchCount = logic.count();
 
         return (
         <div {...rest} className='board'>
             <div className='board-grid'>
                 {matrix.map((row, y) =>
                     <div key={y} className='board-row'>
-                        {row.map((color, x) => {
-                            swatchCount[color] = (swatchCount[color] || 0) + 1;
-                            return <div
+                        {row.map((color, x) =>
+                            <div
                                 key={x}
                                 className='board-cell'
                                 style={{backgroundColor: color}}
@@ -98,7 +97,7 @@ export default class Board extends PureComponent {
                                 data-y={y}
                                 onClick={this.handleCellClick}
                             />
-                        })}
+                        )}
                     </div>
                 )}
             </div>

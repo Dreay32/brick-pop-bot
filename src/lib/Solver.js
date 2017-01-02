@@ -11,6 +11,11 @@ const Heuristics = {
     fewBoth: ({clusters, singles}) => singles.length + clusters.length,
 };
 
+/**
+ * How many points do you get for a cluster of size N
+ */
+const clusterPoints = n => n * (n - 1);
+
 export default class Solver {
 
     logic = null;
@@ -29,17 +34,28 @@ export default class Solver {
         return clusters.length === 0 && singles.length !== 0;
     }
 
-    solve (logic=this.logic, path=[]) {
+    solve (logic=this.logic, path=[], _config) {
         const boardState = this.getBoardState(logic);
 
         if (this.isSuccess(boardState)) return path;
         if (this.isFail(boardState)) return null;
 
-        for (let index = 0; index < boardState.clusters.length; ++index) {
-            const {list: [[x, y]]} = boardState.clusters[index];
+        // if (!_config) {
+        //     const countMap = logic.count();
+        //     _config = {
+        //         bias: Object.keys(countMap).sort((a, b) => countMap[b] - countMap[a]),
+        //     };
+        // }
+
+        const order = Array.from(boardState.clusters).sort((a, b) =>
+            b.list.length - a.list.length
+        );
+
+        for (let index = 0; index < order.length; ++index) {
+            const {list: [[x, y]]} = order[index];
             const clone = logic.clone();
             clone.selectTile(x, y);
-            const result = this.solve(clone, path.concat([[x, y]]));
+            const result = this.solve(clone, path.concat([[x, y]]), _config);
             if (result) return result;
         }
 
