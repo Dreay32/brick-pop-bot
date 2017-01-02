@@ -96,6 +96,7 @@ export default class Board extends PureComponent {
                                 data-x={x}
                                 data-y={y}
                                 onClick={this.handleCellClick}
+                                data-color={color}
                             />
                         )}
                     </div>

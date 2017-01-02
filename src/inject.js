@@ -12,6 +12,8 @@ const SCALE = 1 / 4;
 const ROWS = 10;
 const COLS = 10;
 
+const NULL_COLOR = {h: 35, s: 54, l: 93};
+
 const init = () => {
     const imgData = getImageData();
     const {data, width, height} = imgData;
@@ -30,13 +32,13 @@ const init = () => {
 
     const {matrix, colors} = generatePreview(imgData);
 
-    const matrixData = matrix.map(arr => arr.map(hsl2string));
-    localStorage.lastMatrix = JSON.stringify(matrixData);
+    console.log(matrix)
+    localStorage.lastMatrix = JSON.stringify(matrix);
     const logic = window.logic = new Logic({
         width: COLS,
         height: ROWS,
-        colors: colors.map(hsl2string),
-        data: matrixData,
+        colors,
+        data: matrix,
     });
 
     window.clickOnTile = clickOnTile;
@@ -135,29 +137,23 @@ const generatePreview = imgData => {
     const colors = {};
     const cellW = width / COLS | 0;
     const cellH = height / ROWS | 0;
+    const nullClr = hsl2string(NULL_COLOR);
     for (let y = 0; y < ROWS; ++y) {
         for (let x = 0; x < COLS; ++x) {
             const {data: [r, g, b]} = ctx.getImageData(
                 (x + 0.5) * cellW,
                 (y + 0.5) * cellH, 1, 1
             );
-            matrix[x][y] = rgbToHsl(r, g, b);
-            colors[matrix[x][y].h] = matrix[x][y];
-
-            // const {h, s, v} = matrix[x][y];
-            // console.log(
-            //     '%c  %c x:%d, y:%d, index:%d, [%d %d% %d%]',
-            //     `background: hsl(${h}, ${s}%, ${v}%); border: 1px solid black; border-radius: 50%;`,
-            //     'background: white; border: 0;',
-            //     x, y, index, h, s, v
-            // );
+            let clr = hsl2string(rgbToHsl(r, g, b));
+            if (clr === nullClr) clr = null;
+            matrix[x][y] = clr;
+            colors[clr] = clr;
         }
     }
 
     return {
         matrix,
         colors: Object.values(colors),
-        hues: Object.values(colors).map(obj => obj.h),
     };
 };
 

@@ -40,15 +40,15 @@ export default class Solver {
         if (this.isSuccess(boardState)) return path;
         if (this.isFail(boardState)) return null;
 
-        // if (!_config) {
-        //     const countMap = logic.count();
-        //     _config = {
-        //         bias: Object.keys(countMap).sort((a, b) => countMap[b] - countMap[a]),
-        //     };
-        // }
+        if (!_config) {
+            const countMap = logic.count();
+            _config = {
+                bias: Object.keys(countMap).sort((a, b) => countMap[b] - countMap[a]),
+            };
+        }
 
         const order = Array.from(boardState.clusters).sort((a, b) =>
-            b.list.length - a.list.length
+            a.list.length - b.list.length
         );
 
         for (let index = 0; index < order.length; ++index) {
