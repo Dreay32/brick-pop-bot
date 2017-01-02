@@ -29,6 +29,12 @@ export default class Board extends PureComponent {
         this.state.board = logic.export();
     }
 
+    componentWillReceiveProps (nextProps, nextState) {
+        if (nextProps.logic !== this.props.logic) {
+            this.setState({board: logic.export()});
+        }
+    }
+
     solve () {
         const {onSolve, logic} = this.props;
         const startTime = Date.now();

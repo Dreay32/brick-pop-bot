@@ -1,6 +1,6 @@
 
 import ReactDOM from 'react-dom';
-import React from 'react';
+import React, {PureComponent} from 'react';
 
 import Board from './components/Board/Board';
 import Logic from './lib/Logic';
@@ -15,9 +15,6 @@ const COLS = 10;
 const NULL_COLOR = {h: 35, s: 54, l: 93};
 
 const init = () => {
-    const imgData = getImageData();
-    const {data, width, height} = imgData;
-
     const old = document.getElementById('bot-container');
     if (old) old.remove();
     const container = $(document.createElement('div')).attr({
@@ -29,24 +26,68 @@ const init = () => {
         <div id="bot-react"></div>
     `;
 
-    const {matrix, colors} = generatePreview(imgData);
-
-    console.log(matrix)
-    localStorage.lastMatrix = JSON.stringify(matrix);
-    const logic = window.logic = new Logic({
-        width: COLS,
-        height: ROWS,
-        colors,
-        data: matrix,
-    });
-
-    window.clickOnTile = clickOnTile;
-
     ReactDOM.render(
-        <Board logic={logic} onSolve={handleSolve} />,
+        <App />,
         document.getElementById('bot-react')
     );
 };
+
+class App extends PureComponent {
+    state = {
+        logic: null,
+    };
+
+    constructor (props) {
+        super(props);
+        window.logic = this.state.logic = this.getLogic();
+    }
+
+    getLogic () {
+        const imgData = getImageData();
+        const {data, width, height} = imgData;
+        const {matrix, colors} = generatePreview(imgData);
+        localStorage.lastMatrix = JSON.stringify(matrix);
+        const logic = new Logic({
+            width: COLS,
+            height: ROWS,
+            colors,
+            data: matrix,
+        });
+        return logic;
+    }
+
+    refreshLogic () {
+        const logic = window.logic = this.getLogic();
+        this.setState({logic});
+    }
+
+    handleReload = () => this.refreshLogic();
+
+    handleSolve = solution => {
+        const stack = Array.from(solution);
+        const iterate = () => {
+            this.refreshLogic();
+            if (!stack.length) return;
+            const [x, y] = stack.shift();
+            clickOnTile(x, y);
+            setTimeout(iterate, 2000);
+        }
+        iterate();
+    };
+
+    render () {
+        const {logic} = this.state;
+
+        return (
+            <div>
+                <div>
+                    <button onClick={this.handleReload}>Reload Board</button>
+                </div>
+                <Board logic={logic} onSolve={this.handleSolve} />
+            </div>
+        );
+    }
+}
 
 const hsl2string = ({h, s, l}) => `hsl(${h}, ${s}%, ${l}%)`;
 
@@ -60,17 +101,6 @@ const $ = el => Object.assign(el, {
         return el;
     },
 });
-
-const handleSolve = solution => {
-    const stack = Array.from(solution);
-    const iterate = () => {
-        if (!stack.length) return;
-        const [x, y] = stack.shift();
-        clickOnTile(x, y);
-        setTimeout(iterate, 2000);
-    }
-    iterate();
-}
 
 const pointer = $(document.createElement('div')).css({
     position: 'fixed',
