@@ -34,30 +34,37 @@ export default class Solver {
         return clusters.length === 0 && singles.length !== 0;
     }
 
-    solve (logic=this.logic, path=[], _config) {
-        const boardState = this.getBoardState(logic);
+    solve () {
+        return this._solveIterator(this.logic, this.getBoardState(this.logic));
+    }
 
+    _solveIterator (logic, boardState, path=[], _config) {
         if (this.isSuccess(boardState)) return path;
         if (this.isFail(boardState)) return null;
-
-        if (!_config) {
-            const countMap = logic.count();
-            _config = {
-                bias: Object.keys(countMap).sort((a, b) => countMap[b] - countMap[a]),
-            };
-        }
 
         const order = Array.from(boardState.clusters).sort((a, b) =>
             a.list.length - b.list.length
         );
 
+        const h = Heuristics.fewSingles;
+
+        const currentH = h(boardState);
+
+        const next = [];
         for (let index = 0; index < order.length; ++index) {
-            const {list: [[x, y]]} = order[index];
+            const x = order[index].list[0][0];
+            const y = order[index].list[0][1];
             const clone = logic.clone();
             clone.selectTile(x, y);
-            const result = this.solve(clone, path.concat([[x, y]]), _config);
+            const result = this._solveIterator(
+                clone,
+                this.getBoardState(clone),
+                path.concat([[x, y]]),
+                _config
+            );
             if (result) return result;
         }
+
 
         return null;
     }

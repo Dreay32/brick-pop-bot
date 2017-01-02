@@ -24,16 +24,15 @@ export default class Board extends PureComponent {
         super(props);
 
         const {logic} = this.props;
-        this.solver = new Solver(this.props.logic);
         logic.print();
 
         this.state.board = logic.export();
     }
 
     solve () {
-        const {onSolve} = this.props;
+        const {onSolve, logic} = this.props;
         const startTime = Date.now();
-        const solution = this.solver.solve();
+        const solution = new Solver(logic).solve();
         const duration = Math.round((Date.now() - startTime) / 1000 * 100) / 100;
         if (!solution) return this.setState({message: 'No solution found'});
         if (onSolve) onSolve(solution);
@@ -82,6 +81,7 @@ export default class Board extends PureComponent {
         const matrix = transpose(data);
 
         const swatchCount = logic.count();
+        const boardState = new Solver(logic).getBoardState();
 
         return (
         <div {...rest} className='board'>
@@ -104,12 +104,16 @@ export default class Board extends PureComponent {
             </div>
 
             <div>
+                Tiles:
                 {Object.keys(swatchCount).map(color =>
                     <span className='board-swatch' key={color}>
                         <span  className='board-swatch-icon' style={{background: color}} /> × {swatchCount[color]}
                     </span>
                 )}
             </div>
+
+            <div>Clusters: {boardState.clusters.length}</div>
+            <div>Singles: {boardState.singles.length}</div>
 
             {!message ? null : <div className='board-message'>{message}</div>}
 
