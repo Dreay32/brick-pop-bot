@@ -7,6 +7,7 @@
     background: white;
     color: #333;
     padding: 5px;
+    font-size: 12px;
 }
 
 #bot-container .board-cell {

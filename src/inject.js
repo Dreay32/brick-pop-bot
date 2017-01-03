@@ -32,14 +32,17 @@ const init = () => {
     );
 };
 
+let reloadTimeout = null;
 class App extends PureComponent {
     state = {
         logic: null,
+        autoReload: true,
     };
 
     constructor (props) {
         super(props);
         window.logic = this.state.logic = this.getLogic();
+        clearTimeout(reloadTimeout);
     }
 
     getLogic (noCache=false) {
@@ -64,10 +67,19 @@ class App extends PureComponent {
     handleReload = () => this.refreshLogic();
 
     handleSolve = solution => {
+        clearTimeout(reloadTimeout);
         const stack = Array.from(solution);
         const iterate = () => {
             this.refreshLogic(true);
-            if (!stack.length) return;
+            if (!stack.length) {
+                if (this.state.autoReload) {
+                    reloadTimeout = setTimeout(() => {
+                        this.refreshLogic();
+                        setTimeout(() => { this.refs.board.solve(); }, 500);
+                    }, 10 * 1000);
+                }
+                return;
+            }
             const [x, y] = stack.shift();
             clickOnTile(x, y);
             setTimeout(iterate, 2000);
@@ -75,15 +87,22 @@ class App extends PureComponent {
         iterate();
     };
 
+    handleAutoReload = event => this.setState({autoReload: event.target.checked});
+
     render () {
-        const {logic} = this.state;
+        const {logic, autoReload} = this.state;
 
         return (
             <div>
                 <div>
                     <button onClick={this.handleReload}>Reload Board</button>
+                    <br />
+                    <label>
+                        <input type='checkbox' checked={autoReload} onChange={this.handleAutoReload} />
+                        Auto-Reload
+                    </label>
                 </div>
-                <Board logic={logic} onSolve={this.handleSolve} />
+                <Board logic={logic} onSolve={this.handleSolve} ref='board' />
             </div>
         );
     }
