@@ -37,10 +37,16 @@ export default class Solver {
 
     solve () {
         this._numIterations = 0;
-        return this._solveIterator(this.logic, this.getBoardState(this.logic));
+        this._cache = {};
+        const result = this._solveIterator(this.logic, this.getBoardState(this.logic));
+        // this._cache = {};
+        return result;
     }
 
     _solveIterator (logic, boardState, path=[], _config) {
+        const logicHash = logic.getHash();
+        if (this._cache[logicHash]) return null;
+
         if (this.isSuccess(boardState)) return path;
         if (this.isFail(boardState)) return null;
 
@@ -75,6 +81,7 @@ export default class Solver {
             if (result) return result;
         }
 
+        this._cache[logicHash] = true;
 
         return null;
     }

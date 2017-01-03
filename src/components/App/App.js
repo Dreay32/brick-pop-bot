@@ -26,8 +26,8 @@ export default class App extends PureComponent {
     render () {
         return (
             <div>
-                <Board logic={this.logic} ref={board => {window.solver = board.solver}} />
-                <Board logic={this.logic2} />
+                <Board logic={this.logic} ref={board => {window.solver3 = board.solver}} />
+                <Board logic={this.logic2} ref={board => {window.solver4 = board.solver}} />
             </div>
         );
     }

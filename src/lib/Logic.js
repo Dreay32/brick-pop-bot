@@ -34,6 +34,11 @@ export default class Logic {
         };
     }
 
+    /**
+     * A painfully inefficient hash function, but a hash function nonetheless
+     */
+    getHash () { return JSON.stringify(this.data); }
+
     isOutOfBounds (x, y) {
         const {width, height} = this.options;
         return x < 0 || y < 0 || x >= width || y >= height;
