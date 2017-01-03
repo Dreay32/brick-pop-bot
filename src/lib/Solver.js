@@ -39,7 +39,7 @@ export default class Solver {
         this._numIterations = 0;
         this._cache = {};
         const result = this._solveIterator(this.logic, this.getBoardState(this.logic));
-        // this._cache = {};
+        delete this._cache;
         return result;
     }
 

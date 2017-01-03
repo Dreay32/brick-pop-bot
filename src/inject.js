@@ -82,7 +82,7 @@ class App extends PureComponent {
             }
             const [x, y] = stack.shift();
             clickOnTile(x, y);
-            setTimeout(iterate, 2000);
+            setTimeout(iterate, 2250);
         }
         iterate();
     };
@@ -121,19 +121,8 @@ const $ = el => Object.assign(el, {
     },
 });
 
-const pointer = $(document.createElement('div')).css({
-    position: 'fixed',
-    zIndex: 100000,
-    top: 0,
-    left: 0,
-    width: '20px',
-    height: '20px',
-    border: '2px solid white',
-    boxShadow: '2px 2px 2px #000',
-    borderRadius: '50%',
-    background: 'orange',
-    pointerEvents: 'none',
-});
+const pointer = $(document.createElement('div'));
+pointer.classList.add('bot-pointer')
 pointer.dataset.botInject = true;
 document.body.appendChild(pointer);
 const clickOnTile = (x, y) => {
@@ -148,11 +137,17 @@ const clickOnTile = (x, y) => {
 
     // console.log({delta, offsetLeft, offsetTop, offsetWidth, offsetHeight, tileH, tileW})
     // console.info(`[click(${x}, ${y})]`, targetX, targetY);
-    pointer.style.top = targetY - pointer.offsetWidth / 2 + 'px';
-    pointer.style.left = targetX - pointer.offsetWidth / 2 + 'px';
+    pointer.classList.add('bot-animated');
+    pointer.css({
+        top: targetY - pointer.offsetWidth / 2 + 'px',
+        left: targetX - pointer.offsetWidth / 2 + 'px',
+    });
 
-    dispatchMouseEvent('mousedown', targetX, targetY);
-    dispatchMouseEvent('mouseup', targetX, targetY);
+    // Wait for animation to finish
+    setTimeout(() => {
+        dispatchMouseEvent('mousedown', targetX, targetY);
+        dispatchMouseEvent('mouseup', targetX, targetY);
+    }, 250);
 }
 
 // http://stackoverflow.com/a/16509592/574576
