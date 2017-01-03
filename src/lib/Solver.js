@@ -36,6 +36,7 @@ export default class Solver {
     }
 
     solve () {
+        this._numIterations = 0;
         return this._solveIterator(this.logic, this.getBoardState(this.logic));
     }
 
@@ -43,9 +44,9 @@ export default class Solver {
         if (this.isSuccess(boardState)) return path;
         if (this.isFail(boardState)) return null;
 
-        const order = Array.from(boardState.clusters).sort((a, b) =>
-            a.list.length - b.list.length
-        );
+        if (++this._numIterations % 10000 === 0) {
+            console.info('%d0k iterations', this._numIterations / 10000);
+        }
 
         const h = boardState.singles.length ?
             ({state}) => Heuristics.fewSingles(state) :
@@ -53,7 +54,7 @@ export default class Solver {
 
         const siblings = [];
 
-        for (let {list} of order) {
+        for (let {list} of boardState.clusters) {
             const clone = logic.clone();
             const [x, y] = list[0];
             clone.selectTile(x, y);

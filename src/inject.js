@@ -42,11 +42,11 @@ class App extends PureComponent {
         window.logic = this.state.logic = this.getLogic();
     }
 
-    getLogic () {
+    getLogic (noCache=false) {
         const imgData = getImageData();
         const {data, width, height} = imgData;
         const {matrix, colors} = generatePreview(imgData);
-        localStorage.lastMatrix = JSON.stringify(matrix);
+        if (!noCache) localStorage.lastMatrix = JSON.stringify(matrix);
         const logic = new Logic({
             width: COLS,
             height: ROWS,
@@ -56,8 +56,8 @@ class App extends PureComponent {
         return logic;
     }
 
-    refreshLogic () {
-        const logic = window.logic = this.getLogic();
+    refreshLogic (noCache) {
+        const logic = window.logic = this.getLogic(noCache);
         this.setState({logic});
     }
 
@@ -66,7 +66,7 @@ class App extends PureComponent {
     handleSolve = solution => {
         const stack = Array.from(solution);
         const iterate = () => {
-            this.refreshLogic();
+            this.refreshLogic(true);
             if (!stack.length) return;
             const [x, y] = stack.shift();
             clickOnTile(x, y);
