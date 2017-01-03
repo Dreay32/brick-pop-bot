@@ -30,8 +30,9 @@ export default class Solver {
     }
 
     isFail (boardState) {
-        const {clusters, singles} = boardState;
-        return clusters.length === 0 && singles.length !== 0;
+        const {clusters, singles, count} = boardState;
+        return (clusters.length === 0 && singles.length !== 0) ||
+            Object.values(count).some(num => num === 1);
     }
 
     solve () {
@@ -46,19 +47,27 @@ export default class Solver {
             a.list.length - b.list.length
         );
 
-        const h = Heuristics.fewSingles;
-        const currentH = h(boardState);
+        const h = boardState.singles.length ?
+            ({state}) => Heuristics.fewSingles(state) :
+            ({score}) => -1 * score;
+
         const siblings = [];
 
-        for (let index = 0; index < order.length; ++index) {
-            const {list: [coord]} = order[index];
+        for (let {list} of order) {
             const clone = logic.clone();
-            clone.selectTile(coord[0], coord[1]);
+            const [x, y] = list[0];
+            clone.selectTile(x, y);
             const state = this.getBoardState(clone);
-            siblings.push({coord, clone, state});
+            const score = clusterPoints(list.length);
+            siblings.push({
+                clone,
+                state,
+                score,
+                coord: list[0],
+            });
         }
 
-        siblings.sort((a, b) => h(a.state) - h(b.state));
+        siblings.sort((a, b) => h(a) - h(b));
 
         for (let {coord, clone, state} of siblings) {
             const result = this._solveIterator(clone, state, path.concat([coord]), _config);
@@ -88,6 +97,7 @@ export default class Solver {
 
         const clusters = [];
         const singles = [];
+        const count = {};
         while (toCheck.length) {
             const [x, y] = toCheck.pop();
 
@@ -100,6 +110,7 @@ export default class Solver {
             if (cluster == null) continue;
             const bucket = cluster.list.length >= 2 ? clusters : singles;
 
+            count[cluster.id] = (count[cluster.id] || 0) + cluster.list.length;
             for (let [x, y] of cluster.list) {
                 data[x][y] = null;
                 hash.set(x, y);
@@ -110,6 +121,7 @@ export default class Solver {
         return {
             clusters,
             singles,
+            count,
         };
     }
 }

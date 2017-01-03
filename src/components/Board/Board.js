@@ -27,18 +27,20 @@ export default class Board extends PureComponent {
         logic.print();
 
         this.state.board = logic.export();
+        this.solver = new Solver(logic);
     }
 
     componentWillReceiveProps (nextProps, nextState) {
         if (nextProps.logic !== this.props.logic) {
             this.setState({board: logic.export()});
+            this.solver = new Solver(logic);
         }
     }
 
     solve () {
         const {onSolve, logic} = this.props;
         const startTime = Date.now();
-        const solution = new Solver(logic).solve();
+        const solution = this.solver.solve();
         const duration = Math.round((Date.now() - startTime) / 1000 * 100) / 100;
         if (!solution) return this.setState({message: 'No solution found'});
         if (onSolve) onSolve(solution);
@@ -87,7 +89,7 @@ export default class Board extends PureComponent {
         const matrix = transpose(data);
 
         const swatchCount = logic.count();
-        const boardState = new Solver(logic).getBoardState();
+        const boardState = this.solver.getBoardState();
 
         return (
         <div {...rest} className='board'>
