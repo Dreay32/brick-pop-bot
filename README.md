@@ -1,15 +1,38 @@
 # Hacking Facebook's Brick Pop Game
 
+A bot for auto-solving Facebook Messenger's Brick Pop game.
+
+As of right now the focus is on solving the board and not on getting the best score.
+High score comes from its ability to brute force endlessly
+
+*Tested in latest Chrome on OSX*
+
+![brick-pop-bot.gif](https://raw.githubusercontent.com/smirea/brick-pop-bot/master/brick-pop-bot.gif)
+
 ## Setup:
+
+**Temporary:** Open the game in messenger, and open it's iframe link in a new tab
 
 Due to content-src policy on messenger.com, we need to do some DNS magic:
 
 ```bash
-# Redirect local.messenger.com -> localhost
-echo '127.0.0.1 mylocal.facebook.com' | sudo tee -a /file.txt
+# Edit hosts file to redirect mylocal.facebook.com --> localhost
+echo '127.0.0.1 mylocal.facebook.com' | sudo tee -a /etc/hosts
 ```
 
-After opening a Brick Pop game in a messenger window, open the console and paste:
+## Run Server
+
+```bash
+# Build latest
+npm run build   # alternatively: npm run watch
+
+# But in order for it to work with messenger, it needs port 80:
+sudo PORT=80 npm run start
+```
+
+## Run Bot
+
+After opening a Brick Pop game in a messenger window, open the console and paste to inject the bot:
 
 ```js
 (() => {
@@ -33,15 +56,8 @@ After opening a Brick Pop game in a messenger window, open the console and paste
 })();
 ```
 
-## Run
+## Development
 
 ```bash
-# You can run this locally on any port to play with the as-is version
-npm run start
-
-# But in order for it to work with messenger, it needs port 80:
-sudo PORT=80 npm run start
-
-# Alternative, development version:
 npm run start-dev
 ```
