@@ -114,35 +114,37 @@ export default class Board extends PureComponent {
                 )}
             </div>
 
-            <div>
-                Tiles:
-                {Object.keys(swatchCount).map(color =>
-                    <span className='board-swatch' key={color}>
-                        <span  className='board-swatch-icon' style={{background: color}} /> × {swatchCount[color]}
-                    </span>
-                )}
-            </div>
-
-            <div>Clusters: {boardState.clusters.length}</div>
-            <div>Singles: {boardState.singles.length}</div>
-
-            {!error ? null : <div className='board-error'>{error}</div>}
-
-            {!message ? null : <div className='board-message'>{message}</div>}
-
-            {!solution ? null :
-                <div className='board-message'>
-                    Solution has {solution.length} moves. <br />
-                    Solved in {duration}s
+            <div className='board-info'>
+                <div>
+                    Tiles:
+                    {Object.keys(swatchCount).map(color =>
+                        <span className='board-swatch' key={color}>
+                            <span  className='board-swatch-icon' style={{background: color}} /> × {swatchCount[color]}
+                        </span>
+                    )}
                 </div>
-            }
 
-            <div>
-                <button disabled={playing} onClick={this.handleSolve}>Solve!</button>
+                <div>Clusters: {boardState.clusters.length}</div>
+                <div>Singles: {boardState.singles.length}</div>
+
+                {!error ? null : <div className='board-error'>{error}</div>}
+
+                {!message ? null : <div className='board-message'>{message}</div>}
 
                 {!solution ? null :
-                    <button disabled={playing} onClick={this.handlePlay}>Play Solution!</button>
+                    <div className='board-message'>
+                        Solution has {solution.length} moves. <br />
+                        Solved in {duration}s
+                    </div>
                 }
+
+                <div>
+                    <button disabled={playing} onClick={this.handleSolve}>Solve!</button>
+
+                    {!solution ? null :
+                        <button disabled={playing} onClick={this.handlePlay}>Play Solution!</button>
+                    }
+                </div>
             </div>
         </div>
         );

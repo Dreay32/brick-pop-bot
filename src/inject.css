@@ -1,7 +1,7 @@
 
 #bot-container {
     position: fixed;
-    top: 30px;
+    bottom: 0;
     left: 2px;
     border: 1px solid #666;
     background: white;
@@ -10,9 +10,18 @@
     font-size: 12px;
 }
 
+#bot-container .board {
+    display: flex;
+}
+
+#bot-container .board-info {
+    padding: 0 10px;
+    line-height: 1.5;
+}
+
 #bot-container .board-cell {
-    width: 15px;
-    height: 15px;
+    width: 10px;
+    height: 10px;
 }
 
 #bot-preview {
@@ -20,7 +29,7 @@
 }
 
 #bot-react {
-    max-width: 170px;
+    /*max-width: 170px;*/
 }
 
 .bot-pointer {
