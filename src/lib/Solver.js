@@ -58,9 +58,14 @@ export default class Solver {
             ({state}) => Heuristics.fewSingles(state) :
             ({score}) => -1 * score;
 
-        const siblings = [];
+        // Prefer clusters towards the bottom center part of the board (bottom first, center next)
+        const orderedClusters = Array.from(boardState.clusters).sort((a, b) => {
+            const yDelta = b.yScore - a.yScore;
+            return yDelta !== 0 ? yDelta : b.xScore - a.xScore;
+        });
 
-        for (let {list} of boardState.clusters) {
+        const siblings = [];
+        for (let {list} of orderedClusters) {
             const clone = logic.clone();
             const [x, y] = list[0];
             clone.selectTile(x, y);

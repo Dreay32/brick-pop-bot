@@ -36,8 +36,14 @@ const init = () => {
         <div id="bot-react"></div>
     `;
 
-    window.onblur = () => { actionQueue.stop(); };
-    window.onfocus = () => { actionQueue.run(); };
+    window.onblur = () => {
+        console.warn('Tab changed. Stopping actionQueue');
+        actionQueue.stop();
+    };
+    window.onfocus = () => {
+        console.info('Tab regained focus. Starting actionQueue');
+        actionQueue.run();
+    };
 
     ReactDOM.render(
         <App />,
@@ -147,9 +153,15 @@ class App extends PureComponent {
 
         if (!stack.length) return;
 
-        actionQueue.add(...stack.map(([x, y]) => () =>
-            clickOnTile(x, y).then(() => PromiseTimeout(2250))
-        ));
+        actionQueue.add(
+            ...([].concat.apply([],
+                stack.map(([x, y]) => [
+                    () => clickOnTile(x, y),
+                    () => PromiseTimeout(2250),
+                    () => this.refreshLogic(true),
+                ])
+            ))
+        );
 
         actionQueue.add(() => {
             if (!this.state.autoReload) return;

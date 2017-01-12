@@ -127,6 +127,15 @@ export default class Logic {
             stack.push([x, y]);
         }
 
+        const result = {
+            id,
+            list: cluster,
+        };
+
+        let size = 0;
+        let xScore = 0;
+        let yScore = 0;
+
         let forceBreak = width * height * 2 + 10;
         while (stack.length) {
             // While loops make me paranoid
@@ -135,6 +144,8 @@ export default class Logic {
             const [x, y] = coord;
 
             cluster.push(coord);
+            yScore += y;
+            xScore += x;
             hash.set(x, y);
             checkAndAdd(x, y - 1);
             checkAndAdd(x + 1, y);
@@ -142,10 +153,24 @@ export default class Logic {
             checkAndAdd(x - 1, y);
         }
 
-        return {
-            id,
-            list: cluster,
-        };
+        // Favors clusters toward the bottom of the board
+        yScore = yScore / result.size;
+
+        /**
+         * Favors clusters towards the center of the board
+         *
+         * 0 1 2 3 4 5 6 7 8 9
+         * | | | | | | | | | |
+         * 0 1 2 3 4 5 4 3 2 1
+         */
+        xScore = xScore / result.size;
+        xScore = xScore <= 5 ? xScore : width - xScore;
+
+        result.size = cluster.length;
+        result.xScore = xScore;
+        result.yScore = yScore;
+
+        return result;
     }
 
     initData () { this.data = this.createData(); }
