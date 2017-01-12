@@ -13,11 +13,20 @@ const ROWS = 10;
 const COLS = 10;
 
 const NULL_COLOR = {h: 35, s: 54, l: 93};
-let isFocused = true;
 
 const init = () => {
     const old = document.getElementById('bot-container');
-    if (old) old.remove();
+    if (old) {
+        console.log('Removing previous canvas')
+        old.remove();
+    }
+
+    if (window._actionQueue) {
+        console.log('Removing previous actionQueue');
+        window._actionQueue.stop();
+        window._actionQueue.empty();
+    }
+
     const container = $(document.createElement('div')).attr({
         id: 'bot-container',
     });
@@ -27,14 +36,70 @@ const init = () => {
         <div id="bot-react"></div>
     `;
 
-    window.onblur = () => { isFocused = false; };
-    window.onfocus = () => { isFocused = true; };
+    window.onblur = () => { actionQueue.stop(); };
+    window.onfocus = () => { actionQueue.run(); };
 
     ReactDOM.render(
         <App />,
         document.getElementById('bot-react')
     );
 };
+
+class PromiseQueue {
+    items = [];
+    // Automatically start the queue on .add()
+    autoRun = true;
+
+    constructor ({autoRun=true}={}) {
+        this.autoRun = autoRun;
+    }
+
+    add (...fnList) {
+        this.items.push(...fnList);
+        if (this.autoRun) this.run();
+    }
+
+    empty () { this.items = []; }
+
+    stop () { delete this._currentRun; }
+
+    isRunning () { return !!this._currentRun; }
+
+    _iterate = () => {
+        if (!this._currentRun) return;
+
+        if (!this.items.length) {
+            this._currentRun.resolve();
+            delete this._currentRun;
+            return;
+        }
+
+        Promise.resolve()
+        .then(this.items.shift())
+        .then(this._iterate)
+        .catch(ex => {
+            console.warn('[PromiseQueue] FAILED:', ex.stack || ex.message || ex);
+            reject(ex);
+        });
+    };
+
+    run () {
+        if (this._currentRun) return this._currentRun;
+
+        const attributes = {};
+        const promise = new Promise((resolve, reject) => {
+            Object.assign(attributes, {resolve, reject});
+        });
+        Object.assign(promise, attributes);
+        this._currentRun = promise;
+        this._iterate();
+        return promise;
+    }
+};
+
+const PromiseTimeout = time => new Promise(resolve => setTimeout(() => resolve(), time));
+
+const actionQueue = window._actionQueue = new PromiseQueue();
 
 let reloadTimeout = null;
 class App extends PureComponent {
@@ -46,7 +111,6 @@ class App extends PureComponent {
     constructor (props) {
         super(props);
         window.logic = this.state.logic = this.getLogic();
-        clearTimeout(reloadTimeout);
     }
 
     getLogic (noCache=false) {
@@ -71,33 +135,45 @@ class App extends PureComponent {
     handleReload = () => this.refreshLogic();
 
     handleSolve = solution => {
-        clearTimeout(reloadTimeout);
-        const stack = Array.from(solution);
-        const iterate = () => {
-            this.refreshLogic(true);
-            if (!stack.length) {
-                if (this.state.autoReload) {
-                    console.info('will autoReload');
-                    reloadTimeout = setTimeout(() => {
-                        console.log('  - clicking on top left');
-                        dispatchClick(getCanvas().offsetLeft + 20, getCanvas().offsetTop + 20);
-                        setTimeout(() => {
-                            console.log('  - refreshing');
-                            this.refreshLogic();
-                            setTimeout(() => {
-                                console.log('  - solving');
-                                this.refs.board.solve();
-                            }, 500);
-                        }, 4 * 1000)
-                    }, 2 * 1000);
-                }
-                return;
-            }
-            const [x, y] = stack.shift();
-            clickOnTile(x, y);
-            setTimeout(iterate, 2250);
+        if (actionQueue.isRunning()) {
+            console.warn('Already running');
+            return;
         }
-        iterate();
+
+        const stack = Array.from(solution);
+
+        actionQueue.add(() => this.refreshLogic(true));
+
+        if (!stack.length) return;
+
+        actionQueue.add(...stack.map(([x, y]) => () =>
+            clickOnTile(x, y).then(() => PromiseTimeout(2250))
+        ));
+
+        actionQueue.add(() => {
+            if (!this.state.autoReload) return;
+
+            actionQueue.add(
+                () => {
+                    console.info('will autoReload');
+                    return PromiseTimeout(2000);
+                },
+                () => {
+                    console.log('  - clicking on top left');
+                    return dispatchClick(getCanvas().offsetLeft + 20, getCanvas().offsetTop + 20);
+                },
+                () => PromiseTimeout(4 * 1000),
+                () => {
+                    console.log('  - refreshing');
+                    this.refreshLogic();
+                    return PromiseTimeout(500);
+                },
+                () => {
+                    console.log('  - solving');
+                    this.refs.board.solve();
+                },
+            );
+        });
     };
 
     handleAutoReload = event => this.setState({autoReload: event.target.checked});
@@ -150,8 +226,8 @@ const clickOnTile = (x, y) => {
     const targetX = offsetLeft + (x + 0.5) * tileW | 0;
     const targetY = offsetTop + delta + (y + 0.5) * tileH | 0;
 
-    dispatchClick(targetX, targetY);
-}
+    return dispatchClick(targetX, targetY);
+};
 
 const dispatchClick = (x, y) => {
     pointer.classList.add('bot-animated');
@@ -160,12 +236,11 @@ const dispatchClick = (x, y) => {
         left: x - pointer.offsetWidth / 2 + 'px',
     });
 
-    // Wait for animation to finish
-    setTimeout(() => {
+    return PromiseTimeout(250).then(() => {
         dispatchMouseEvent('mousedown', x, y);
         dispatchMouseEvent('mouseup', x, y);
-    }, 250);
-}
+    });
+};
 
 // http://stackoverflow.com/a/16509592/574576
 const dispatchMouseEvent = (type, x, y) => {
