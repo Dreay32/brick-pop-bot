@@ -11,8 +11,6 @@ High score comes from its ability to brute force endlessly
 
 ## Setup:
 
-**Temporary:** Open the game in messenger, and open it's iframe link in a new tab
-
 Due to content-src policy on messenger.com, we need to do some DNS magic:
 
 ```bash
@@ -33,6 +31,7 @@ sudo PORT=80 npm run start
 ## Run Bot
 
 After opening a Brick Pop game in a messenger window, open the console and paste to inject the bot:
+Make sure to paste this in the `index.html` context (the iframe context)
 
 ```js
 (() => {
