@@ -64,6 +64,7 @@ class PromiseQueue {
     stop () { delete this._currentRun; }
 
     isRunning () { return !!this._currentRun; }
+    isEmpty () { return !this.items.length; }
 
     _iterate = () => {
         if (!this._currentRun) return;
@@ -79,7 +80,7 @@ class PromiseQueue {
         .then(this._iterate)
         .catch(ex => {
             console.warn('[PromiseQueue] FAILED:', ex.stack || ex.message || ex);
-            reject(ex);
+            this._currentRun.reject(ex);
         });
     };
 
@@ -135,7 +136,7 @@ class App extends PureComponent {
     handleReload = () => this.refreshLogic();
 
     handleSolve = solution => {
-        if (actionQueue.isRunning()) {
+        if (actionQueue.isRunning() && !actionQueue.isEmpty()) {
             console.warn('Already running');
             return;
         }
