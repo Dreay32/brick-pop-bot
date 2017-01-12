@@ -13,6 +13,7 @@ const ROWS = 10;
 const COLS = 10;
 
 const NULL_COLOR = {h: 35, s: 54, l: 93};
+let isFocused = true;
 
 const init = () => {
     const old = document.getElementById('bot-container');
@@ -26,11 +27,17 @@ const init = () => {
         <div id="bot-react"></div>
     `;
 
+    window.onblur = () => { isFocused = false; };
+    window.onfocus = () => { isFocused = true; };
+
     ReactDOM.render(
         <App />,
         document.getElementById('bot-react')
     );
 };
+
+// Increase timeout durations when the tab is not focused
+const makeTimeout = (fn, time) => setTimeout(fn, (isFocused ? 1 : 2) * time);
 
 let reloadTimeout = null;
 class App extends PureComponent {
@@ -75,14 +82,14 @@ class App extends PureComponent {
                 if (this.state.autoReload) {
                     reloadTimeout = setTimeout(() => {
                         this.refreshLogic();
-                        setTimeout(() => { this.refs.board.solve(); }, 500);
+                        makeTimeout(() => { this.refs.board.solve(); }, 500);
                     }, 10 * 1000);
                 }
                 return;
             }
             const [x, y] = stack.shift();
             clickOnTile(x, y);
-            setTimeout(iterate, 2250);
+            makeTimeout(iterate, 2250);
         }
         iterate();
     };
