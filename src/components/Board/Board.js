@@ -18,6 +18,8 @@ export default class Board extends PureComponent {
         board: null,
         solution: null,
         duration: null,
+        message: null,
+        error: null,
     };
 
     constructor (props) {
@@ -42,7 +44,8 @@ export default class Board extends PureComponent {
         const startTime = Date.now();
         const solution = this.solver.solve();
         const duration = Math.round((Date.now() - startTime) / 1000 * 100) / 100;
-        if (!solution) return this.setState({message: 'No solution found'});
+        this.setState({error: null, message: null});
+        if (!solution) return this.setState({error: 'No solution found'});
         if (onSolve) onSolve(solution);
         this.setState({solution, duration});
     }
@@ -54,7 +57,7 @@ export default class Board extends PureComponent {
         if (!solution) return;
         const clone = logic.clone();
         const queue = Array.from(solution);
-        this.setState({playing: true});
+        this.setState({playing: true, message: null, error: null});
         this._playInterval = setInterval(() => {
             if (!queue.length) {
                 clearInterval(this._playInterval);
@@ -84,7 +87,7 @@ export default class Board extends PureComponent {
 
     render () {
         const {logic, onSolve, ...rest} = this.props;
-        const {solution, duration, message, playing, board: {data}} = this.state;
+        const {solution, duration, message, error, playing, board: {data}} = this.state;
 
         const matrix = transpose(data);
 
@@ -122,6 +125,8 @@ export default class Board extends PureComponent {
 
             <div>Clusters: {boardState.clusters.length}</div>
             <div>Singles: {boardState.singles.length}</div>
+
+            {!error ? null : <div className='board-error'>{error}</div>}
 
             {!message ? null : <div className='board-message'>{message}</div>}
 

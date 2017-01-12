@@ -38,3 +38,8 @@
     background: black;
     margin-right: 3px;
 }
+
+.board-error {
+    color: crimson;
+    margin: 3px 0;
+}

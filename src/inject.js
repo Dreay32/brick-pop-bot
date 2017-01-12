@@ -36,9 +36,6 @@ const init = () => {
     );
 };
 
-// Increase timeout durations when the tab is not focused
-const makeTimeout = (fn, time) => setTimeout(fn, (isFocused ? 1 : 2) * time);
-
 let reloadTimeout = null;
 class App extends PureComponent {
     state = {
@@ -80,16 +77,25 @@ class App extends PureComponent {
             this.refreshLogic(true);
             if (!stack.length) {
                 if (this.state.autoReload) {
+                    console.info('will autoReload');
                     reloadTimeout = setTimeout(() => {
-                        this.refreshLogic();
-                        makeTimeout(() => { this.refs.board.solve(); }, 500);
-                    }, 10 * 1000);
+                        console.log('  - clicking on top left');
+                        dispatchClick(getCanvas().offsetLeft + 20, getCanvas().offsetTop + 20);
+                        setTimeout(() => {
+                            console.log('  - refreshing');
+                            this.refreshLogic();
+                            setTimeout(() => {
+                                console.log('  - solving');
+                                this.refs.board.solve();
+                            }, 500);
+                        }, 4 * 1000)
+                    }, 2 * 1000);
                 }
                 return;
             }
             const [x, y] = stack.shift();
             clickOnTile(x, y);
-            makeTimeout(iterate, 2250);
+            setTimeout(iterate, 2250);
         }
         iterate();
     };
@@ -128,12 +134,14 @@ const $ = el => Object.assign(el, {
     },
 });
 
+const getCanvas = () => document.getElementById('canvas');
+
 const pointer = $(document.createElement('div'));
 pointer.classList.add('bot-pointer')
 pointer.dataset.botInject = true;
 document.body.appendChild(pointer);
 const clickOnTile = (x, y) => {
-    const {offsetLeft, offsetTop, offsetWidth, offsetHeight} = document.getElementById('canvas');
+    const {offsetLeft, offsetTop, offsetWidth, offsetHeight} = getCanvas();
 
     const delta = (offsetHeight - offsetWidth) / 2;
     const tileW = offsetWidth / COLS;
@@ -142,18 +150,20 @@ const clickOnTile = (x, y) => {
     const targetX = offsetLeft + (x + 0.5) * tileW | 0;
     const targetY = offsetTop + delta + (y + 0.5) * tileH | 0;
 
-    // console.log({delta, offsetLeft, offsetTop, offsetWidth, offsetHeight, tileH, tileW})
-    // console.info(`[click(${x}, ${y})]`, targetX, targetY);
+    dispatchClick(targetX, targetY);
+}
+
+const dispatchClick = (x, y) => {
     pointer.classList.add('bot-animated');
     pointer.css({
-        top: targetY - pointer.offsetWidth / 2 + 'px',
-        left: targetX - pointer.offsetWidth / 2 + 'px',
+        top: y - pointer.offsetWidth / 2 + 'px',
+        left: x - pointer.offsetWidth / 2 + 'px',
     });
 
     // Wait for animation to finish
     setTimeout(() => {
-        dispatchMouseEvent('mousedown', targetX, targetY);
-        dispatchMouseEvent('mouseup', targetX, targetY);
+        dispatchMouseEvent('mousedown', x, y);
+        dispatchMouseEvent('mouseup', x, y);
     }, 250);
 }
 
@@ -208,7 +218,7 @@ const generatePreview = imgData => {
 };
 
 const getImageData = () => {
-    const canvas = document.getElementById('canvas');
+    const canvas = getCanvas();
     const {width, height} = canvas;
 
     const delta = (height - width) * SCALE / 2;
