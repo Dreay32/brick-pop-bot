@@ -59,5 +59,5 @@ After opening a Brick Pop game in a messenger window, open the console and paste
 ## Development
 
 ```bash
-npm run start-dev
+npm run watch
 ```

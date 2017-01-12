@@ -4,11 +4,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "start-pi": "node server-pi.js",
     "start-dev": "webpack-dev-server",
     "watch": "webpack -w",
-    "build": "webpack -p",
-    "postinstall": "if [ $IS_HEROKU ]; then npm run build; fi"
+    "build": "webpack -p"
   },
   "engines": {
     "node": "6.4.x"
@@ -16,12 +14,10 @@
   "author": "Stefan Mirea",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.15.2",
     "babel-preset-env": "^1.1.4",
     "body-parser": "^1.15.2",
     "colors": "^1.1.2",
     "cors": "^2.8.1",
-    "dotenv": "^2.0.0",
     "express": "^4.14.0",
     "react": "^15.4.1",
     "react-dom": "^15.4.1"
@@ -46,8 +42,5 @@
     "webpack": "2.2.0-rc.2",
     "webpack-dev-server": "^1.16.2",
     "webpack-manifest-plugin": "^1.1.0"
-  },
-  "bin": {
-    "home": "pm2-pi.js"
   }
 }
